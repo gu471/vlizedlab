@@ -1,3 +1,5 @@
+find / -name "*" | xargs grep -i "text_pattern"
+
 http://www.vlizedlab.at/installation.html
 
 usermod student -G vboxusers 	# USB weiterreichen
