@@ -1,0 +1,4 @@
+		# List of Possible vlizedroot servers. Makes search path
+		vlizedlabroot
+		192.168.2.1
+		root.vlizedlab.at

@@ -1,0 +1,8 @@
+		# This is /etc/vlizedlab/vmsources
+		# it defines where this vlizedlab client can get its virtual machines
+		# Format is
+		# method            name         source
+		rsync               mysite       vlizedlabroot::vbox
+		#http                vlizedlab    http://download.vlizedlab.at/machines
+		# for local ressources uncomment and adapt this line:
+		# rsync              localdisc     /mounteddir

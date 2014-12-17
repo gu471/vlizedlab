@@ -1,0 +1,15 @@
+                #!/bin/bash
+                VLCROOT=/root/vlizedlabroot
+                # echo "MY`date +%Y%m%d%H%M%S`" > $VLCROOT/configdate
+                echo "MY`date +%Y%m%d`" > $VLCROOT/configdate
+                mkdir -p /root/tmp
+                (
+                cd $VLCROOT ;
+                tar -cvz --exclude='*.svn' -f /root/tmp/config.tar.gz *
+                )
+                cd /root/tmp
+                if [ -f config.tar.gz.asc ]; then rm config.tar.gz.asc; fi
+                gpg -v --local-user admin@gu471.de -s --armor config.tar.gz
+                mv -vf config.tar.gz.asc /home/vlizedlabroot/
+                rm -vf /root/tmp/config.tar.gz
+

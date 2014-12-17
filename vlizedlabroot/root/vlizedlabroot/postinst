@@ -1,0 +1,83 @@
+#!/bin/bash
+# HOST="192.168.2.1"
+HOST="vlizedlabroot"
+echo "vlizedlab postinst script"
+
+######### /etc/vlizedlab/mystudentlist
+if [ ! -f /etc/vlizedlab/mystudentlist ]; then
+echo "Writing /etc/vlizedlab/mystudentlist"
+cat > /etc/vlizedlab/mystudentlist <<EOF
+# This is /etc/vlizedlab/mystudentlist.
+# Write one PC (host name or IP) per line for every student
+# you are responsible for.
+# Lines starting with # and blank lines are ignored.
+# Call vlmaketeacherpc afterwards.
+# 10.1.2.3
+# 	Insert other IPs as you wish
+# 10.1.2.99
+EOF
+fi
+
+######### Clients should use the apt-cacher
+cat > /etc/apt/apt.conf <<EOF
+Acquire::http::Proxy "http://vlizedlabroot:3142";
+APT::Cache-Limit "134217728";
+EOF
+
+######## Passwords
+# Call:
+#      echo 'yoursecrectpassword' | mkpasswd -Hmd5 -s
+# and patch the resulting string here
+ROOTPWSTRING='$1$V3W8Ed/h$SVNTp23.8HV2MDi9GqhzR1'
+usermod -p "$ROOTPWSTRING" root
+STUDENTPWSTRING='$1$V3W8Ed/h$SVNTp23.8HV2MDi9GqhzR1'
+usermod -p "$STUDENTPWSTRING" student
+
+### SET HOSTNAME
+cd ~
+
+MAC=`ifconfig eth0 | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}'`
+
+if [ ! -d "temp.wget" ]; then
+  mkdir temp.wget
+fi
+
+cd temp.wget
+
+MAC=`echo $MAC | tr -d ':'`
+
+wget http://$HOST/$MAC
+ACTION=""
+if [ -e $MAC ]; then
+        #echo "$MAC"
+        NAME=`cat $MAC`
+
+        if [[ hostname != $NAME ]]; then
+                HOSTS="127.0.0.1 localhost $NAME"
+                echo $HOSTS > /etc/hosts.or
+                echo $NAME > /etc/hostname.or
+
+                #ACTION="reboot"
+        fi
+fi
+cd ..
+rm -r temp.wget
+
+#cd /etc/init.d/
+#
+#if [ -e hostname_override.sh ]; then
+#	rm hostname_override.sh
+#fi
+
+#wget http://$HOST/hostname_override.sh
+#chmod +x hostname_override.sh
+#if [ -e /etc/init.d/hostname_override.sh ]; then
+#	update-rc.d hostname_override.sh defaults
+#fi
+
+if [[ $ACTION = "reboot" ]]; then
+        reboot
+fi
+
+exit 0
+
