@@ -1,0 +1,124 @@
+#!/bin/bash
+# normally started as user Student within X
+
+VLCOMMON=/usr/share/vlizedlab/scripts/common
+if [ -f $VLCOMMON ]; then source $VLCOMMON ; else exit 1; fi
+
+TITLE="VlizedlabClient (c)the-M `_version` - `hostname`"
+sleep 1
+
+#_startvm () {
+#     if [ -d $VMHOME/$1 ]; then
+#        echo "Starting  Virtual Machine vms/$1"
+#
+#	VMFILE="`find $VMHOME/$1 -name '*.vmx' -print | head -1`"
+#	vmplayer "$VMFILE" 2>&1 > /dev/null &
+#	echo "starting ..."
+#
+#	sleep 5
+#
+#	echo "Started."
+#     fi
+#}
+
+DOEXIT=no
+
+while [ "$DOEXIT" != yes ]; do
+
+	#MENU="0 _A_L_L_"
+	MENU=""
+#	MENU="0"
+#	NR=1
+	NR=0
+#	for XC in `X $VBHOME -maxdepth 1 -type d -print` ; do
+# 	for FF in `find $VBHOME -maxdepth 2 -type f -name '*.sh' -exec grep -H VERSION=$VBSCRIPTVERSION {} \;` ; do
+	for XC in \
+   `find $VBHOME -maxdepth 2 -a -type f -a \( -name '*.sh' -o -name '*.vdi' \) -exec dirname {} \; \
+    | sort -u ` ;
+        do
+#	   SC=`echo $FF | awk -F: '{print $1}'`
+#	   XC=`dirname $SC`
+	   MNAME=`basename $XC`
+	   MDIR=`dirname $XC`
+	   MTOOL=`basename $MDIR`
+	   MENU="$MENU $NR start_${MTOOL}/${MNAME} $XC $MDIR"
+#	   MENU="$MENU $NR $MNAME"
+	   NR=`expr $NR + 1`
+	done
+
+#	MENU="$MENU v _view_remote vv _view_remote_viewonly um _unmount_recent_removable_drive uma _unmount_all_removable_drives"
+	MENU="$MENU x _xterm  t _exit_X"
+
+
+	choice=`dialog --cr-wrap \
+                  --backtitle "$TITLE" \
+	          --menu 'What do you want to do?' 0 0 0 $MENU 3>&1 1>&2 2>&3`
+
+	clear
+
+	#echo "Updating Virtual Machine $choice"
+
+	case $choice in 
+	   0)
+	     echo "Doing nothing."
+	     echo "waiting..."
+	     sleep 1
+	     echo "OK."
+	     ;;
+	   [1-9]|[0-9][0-9])
+	     VM="" 
+#	     NR=1
+	     NR=0
+#	     for FF in `find $VBHOME -maxdepth 2 -type f -name '*.sh' -exec grep -H VERSION=$VBSCRIPTVERSION {} \;` ; do
+#	       SC=`echo $FF | awk -F: '{print $1}'`
+#	       XC=`dirname $SC`
+	     for XC in \
+   `find $VBHOME -maxdepth 2 -a -type f -a \( -name '*.sh' -o -name '*.vdi' \) -exec dirname {} \; \
+    | sort -u ` ;
+             do
+	       if [ "$NR" = "$choice" ]; then
+	          MNAME=`basename $XC`
+	          MDIR=`dirname $XC`
+	          MTOOL=`basename $MDIR`
+	       fi
+	       NR=`expr $NR + 1`
+	     done
+	     
+	     if [ "$MTOOL" = vb ]; then
+	       vlstartvbmachine $MTOOL/$MNAME
+#	     elif [ "$MTOOL" = vbox ]; then
+#	       _startvbox $MNAME
+	     fi
+	     echo "waiting..."
+	     sleep 5
+	     ;;
+	   um)
+	     clear
+             devmon --unmount-recent
+	     sleep 2
+             ;;
+	   uma)
+	     clear
+             devmon --unmount-all
+	     sleep 2
+             ;;
+	   vv) 
+             sudo /usr/sbin/vlviewremote -viewonly
+             ;;
+	   v) 
+             sudo /usr/sbin/vlviewremote
+             ;;
+	   x) 
+             xterm -e bash -c "echo 'Logging in as user >student<; Please provide password.'; sudo /bin/login student" &
+             ;;
+	   t) 
+             DOEXIT=yes
+             ;;
+	esac
+done
+
+#for ff in `ps augx | grep vmware | grep /space/vms | awk '{print $1}'` ; do
+#    kill $ff
+#done
+
+

@@ -1,0 +1,26 @@
+#!/bin/sh
+
+if [ "`debconf-get-selections | grep xserver-xorg/config/inputdevice/keyboard/layout | awk '{print $4}'`" = "de" ]; then
+#     echo "Setting German Keyboard"
+    setxkbmap -layout de
+else
+    setxkbmap -layout us
+fi
+
+# exec ion3 &
+
+exec ck-launch-session ion3 &
+
+( sleep 4 && ( devmon --no-gui --sync --mount-options "noexec,nosuid,noatime,uid=1000,gid=1000,umask=002" 2>&1 | logger -t devmon ) ) &
+
+exec x11vnc -nocursorshape \
+       -xwarppointer \
+       -nodragging \
+       -noxdamage \
+       -forever \
+       -shared -forever -listen 127.0.0.1  \
+	  -display :0 &
+
+#        -rfbauth /usr/share/vlizedlad/data/passwd  \
+
+exec xterm -title "Virtual Machine Start Menu" -e /usr/share/vlizedlab/scripts/startmenuauto
