@@ -26,7 +26,10 @@ VBoxManage --nologo storagectl    $MACHINE --name C$MACHINE \
 	--add ide --controller PIIX4 --hostiocache on
 VBoxManage --nologo storageattach $MACHINE --storagectl C$MACHINE \
 	--port 0 --device 0 --type hdd \
-	--medium $MACHINEDIR/$MACHINE.vdi --mtype multiattach # normal
+	--medium $MACHINEDIR/$MACHINE.vdi --mtype normal # multiattach # normal
+
+python $MACHINEDIR/usb.py &
+
 #VBoxManage --nologo storageattach $MACHINE --storagectl C$MACHINE \
 #	--port 1 --device 0 --type dvddrive \
 #	--medium $MACHINEDIR/install.iso
