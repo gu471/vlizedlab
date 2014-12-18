@@ -43,8 +43,11 @@ if [ -d $VBHOME/$MACHINE ]; then
       rm $MACHINEDIR/$MACHINE.vbox
   fi
 
-  if [ -d $MACHINEDIR/$MACHINE ]; then
+
+  if [ $MACHINE != "autostart" ]; then
+    if [ -d $MACHINEDIR/$MACHINE ]; then
       rm -Rf $MACHINEDIR/$MACHINE
+    fi
   fi
 
   # find $MACHINEDIR -maxdepth 1 -mindepth 1 -type d -exec rm -Rvf {} \;
