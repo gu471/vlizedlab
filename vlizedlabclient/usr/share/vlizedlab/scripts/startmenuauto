@@ -38,13 +38,22 @@ while [ "$DOEXIT" != yes ]; do
 	MENU="$MENU x _xterm  t _exit_X"
 
 	choice=`dialog --cr-wrap \
-                  --backtitle "$TITLE" \
+                 --backtitle "$TITLE" \
+        	   --nocancel \
+         	   --default-item 0\
+          	   --timeout 1 \
 	          --menu 'What do you want to do? a' 0 0 0 $MENU 3>&1 1>&2 2>&3`
 
 	clear
 
 	case $choice in 
-	   0)
+	   x) 
+             xterm -e bash -c "echo 'Logging in as user >student<; Please provide password.'; sudo /bin/login student" &
+             ;;
+	   t) 
+             DOEXIT=yes
+             ;;
+	   *)
 	     VM="" 
 	     NR=0
 		   MNAME=`basename $XC`
@@ -57,12 +66,6 @@ while [ "$DOEXIT" != yes ]; do
 	     echo "waiting..."
 	     sleep 5
 	     ;;
-	   x) 
-             xterm -e bash -c "echo 'Logging in as user >student<; Please provide password.'; sudo /bin/login student" &
-             ;;
-	   t) 
-             DOEXIT=yes
-             ;;
 	esac
 done
 
