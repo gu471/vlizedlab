@@ -1,0 +1,8 @@
+#!/bin/bash
+
+while pgrep VirtualBox >/dev/null                   # As long as the VM is running...
+do
+        sleep 5s                                    # Wait a bit before trying again.
+done
+
+sudo poweroff

@@ -64,13 +64,13 @@ case $choice in
   f)
     true
     ;;
-  a)
+  s)
     cd /home/student
-    su student -c $VLSCRIPTDIR/startauto
+    su student -c $VLSCRIPTDIR/startstudent
     ;;
   *)
     cd /home/student
-    su student -c $VLSCRIPTDIR/startstudent
+    su student -c $VLSCRIPTDIR/startauto
     ;;
 esac
 

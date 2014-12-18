@@ -1,0 +1,88 @@
+#!/bin/bash
+# Called with $1 e.g. vb/MACHINE
+
+echo "Starting Virtual Machine $1"
+
+VLCOMMON=/usr/share/vlizedlab/scripts/common
+if [ -f $VLCOMMON ]; then source $VLCOMMON ; else exit 1; fi
+
+export MACHINE=`basename $1`
+METHOD=`dirname $1`
+
+if [ "$METHOD" != "vb" ]; then
+   echo "ERROR Unknown Method"
+   exit 1
+fi
+
+export MACHINEDIR=$VBHOME/$MACHINE
+
+if [ -d $VBHOME/$MACHINE ]; then
+  if [ -x $VBHOME/$MACHINE/init.sh ]; then
+     SCRIPT=$VBHOME/$MACHINE/init.sh
+  elif [ -x $VBHOME/$MACHINE/$MACHINE.vbox.sh ]; then
+     SCRIPT=$VBHOME/$MACHINE/$MACHINE.vbox.sh
+  else
+     SCRIPT=$VLSCRIPTDIR/vb.init.default.sh
+  fi
+
+  VERSION=`cat $SCRIPT | grep '^VERSION' | awk -F= '{print $2}'`
+  if [ "$VERSION" != "$VBSCRIPTVERSION" ]; then
+       echo "ERROR Script has wrong version"
+       exit 1
+  fi
+
+  echo "Starting Virtual Machine vb/$MACHINE"
+
+  VBoxManage --nologo unregistervm $MACHINE
+
+  if [ -f $MACHINEDIR/$MACHINE.xml ]; then
+      rm $MACHINEDIR/$MACHINE.xml
+  fi
+
+  if [ -f $MACHINEDIR/$MACHINE.vbox ]; then
+      rm $MACHINEDIR/$MACHINE.vbox
+  fi
+
+  if [ -d $MACHINEDIR/$MACHINE ]; then
+      rm -Rf $MACHINEDIR/$MACHINE
+  fi
+
+  # find $MACHINEDIR -maxdepth 1 -mindepth 1 -type d -exec rm -Rvf {} \;
+
+  if [ "`ps augx | grep /usr/bin/X11/startx | grep -v grep | head -1`" = "" ]; then
+    echo "ERROR X not running"
+    exit 1
+  fi
+
+#  ( export MACHINEDIR; export MACHINE ; $SCRIPT )
+  $SCRIPT
+
+#  ( 
+     VBoxManage --nologo startvm $MACHINE 2>&1 3>&1 > /dev/null 
+	# does not wait!!
+	
+	sleep 5s
+
+	if [ $MACHINE == "autostart" ]; then
+		/bin/bash /home/autoshutdown &
+	fi
+
+#     VBoxManage --nologo unregistervm $MACHINE
+#     if [ -f $MACHINEDIR/$MACHINE.xml ]; then
+#        rm $MACHINEDIR/$MACHINE.xml
+#     fi
+
+#     if [ -f $MACHINEDIR/$MACHINE.vbox ]; then
+#       rm $MACHINEDIR/$MACHINE.vbox
+#     fi
+
+#      find $MACHINEDIR -type d -maxdepth 1 -mindepth 1 -exec rm -Rvf {} \;
+
+#  ) &
+#  echo "Started."
+  sleep 1
+
+else
+  echo "ERROR Directory $VBHOME/$1 does not exist"
+  exit 1
+fi

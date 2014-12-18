@@ -24,4 +24,3 @@ cat /usr/share/vlizedlab/scripts/startx_autostart > $HOME/.xinitrc
 
 /usr/bin/X11/startx
 
-
